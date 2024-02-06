@@ -155,6 +155,11 @@ int main( int argc, char * argv[] )
 
 
     free( head_ptr );
+    // Empty the array
+    for (int i = 0; i < token_count; i++) {
+        free(token[i]);  // Free memory occupied by each string
+        token[i] = NULL;  // Set the pointer to NULL
+    }
 
 
   }
