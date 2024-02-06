@@ -99,17 +99,22 @@ int main( int argc, char * argv[] )
     }
 
     // Now print the tokenized input as a debug check
+    int found = 0;  // Flag to check if the file is found
+    int builtIN = 0;// Flag to check if the its a built-in command
     // \TODO Remove this code and replace with your shell functionality
     if (strcmp(token[0],"exit")==0)
     {
       exit(0);
+      
     } 
     if (strcmp(token[0],"cd")==0)
     {
+      builtIN=1;
       chdir(token[1]);
+
       
     }
-    int found = 0;  // Flag to check if the file is found
+    
     char filename[MAX_COMMAND_SIZE]; //for command that user inputs
     strcpy(filename, token[0]);
     char path[MAX_COMMAND_SIZE];
@@ -126,35 +131,26 @@ int main( int argc, char * argv[] )
         }
     }
 
-    if (!found)
+    if ((!found)&&(!builtIN))
     {
         printf("Error: File '%s' not found in any of the specified directories.\n", filename);
     }
-    char* argv[MAX_COMMAND_SIZE]={};
-    //printf("%s",path);
     
-    argv[0]= malloc(strlen(path)+1);
-    strcpy(argv[0],path);
-    
-
     pid_t pid = fork();
     if (pid == -1) {
         perror("fork");
         exit(EXIT_FAILURE);
     } else if (pid == 0) {
         // Child process
-        execv(path, argv);
-        perror("execv");
-        exit(EXIT_FAILURE);
+        if (!builtIN){
+          execv(path, token);
+          perror("execv");
+          exit(EXIT_FAILURE);
+        }
     } else {
         // Parent process
         int status;
         waitpid(pid, &status, 0);
-
-        if (WIFEXITED(status)) {
-            int exit_status = WEXITSTATUS(status);
-            printf("Child process exited with status %d\n", exit_status);
-        }
     }
 
 
