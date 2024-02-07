@@ -32,6 +32,7 @@
 #include <signal.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <fcntl.h>
 
 #define WHITESPACE " \t\n"      // We want to split our command line up into tokens
                                 // so we need to define what delimits our tokens.
@@ -102,11 +103,11 @@ int main( int argc, char * argv[] )
     int found = 0;  // Flag to check if the file is found
     int builtIN = 0;// Flag to check if the its a built-in command
     // \TODO Remove this code and replace with your shell functionality
-    if (strcmp(token[0],"exit")==0)
+     
+    if (strcmp(token[0], "exit")==0)
     {
-      exit(0);
-      
-    } 
+       exit(0);
+    }
     if (strcmp(token[0],"cd")==0)
     {
       builtIN=1;
@@ -142,7 +143,25 @@ int main( int argc, char * argv[] )
         exit(EXIT_FAILURE);
     } else if (pid == 0) {
         // Child process
-        if (!builtIN){
+          for (int i = 0; i < MAX_NUM_ARGUMENTS; i++) {
+                    if (token[i] == NULL) {
+                        break;
+                    }
+
+                    if (strcmp(token[i], ">") == 0) {
+                        int fd = open(token[i + 1], O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+                        if (fd < 0) {
+                            perror("Can't open output file.");
+                            exit(0);
+                        }
+                        dup2(fd, 1);
+                        close(fd);
+
+                        // Trim off the > output part of the command
+                        token[i] = NULL;
+                    }
+                }
+        if ((!builtIN)&&(found)){
           execv(path, token);
           perror("execv");
           exit(EXIT_FAILURE);
