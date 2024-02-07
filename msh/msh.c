@@ -162,9 +162,12 @@ int main( int argc, char * argv[] )
                     }
                 }
         if ((!builtIN)&&(found)){
-          execv(path, token);
-          perror("execv");
-          exit(EXIT_FAILURE);
+          if (execv(path, token) == -1)
+          {
+             perror("execv");
+             exit(0);
+
+          }
         }
     } else {
         // Parent process
