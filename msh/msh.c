@@ -101,7 +101,12 @@ void process_command(char *command_string)
     if (strcmp(token[0], "cd") == 0)
     {
         builtIN = 1;
-        chdir(token[1]);
+        int x = chdir(token[1]);
+        if (x !=0)
+        {
+            write(STDERR_FILENO, error_message, strlen(error_message)); //chdir failed
+            
+        }
     }
 
     char filename[MAX_COMMAND_SIZE];
