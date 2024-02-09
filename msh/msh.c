@@ -58,6 +58,8 @@ int main( int argc, char * argv[] )
 {
   char * command_string = (char*) malloc( MAX_COMMAND_SIZE );
   const char *directories[] = {"/bin", "/usr/bin", "/usr/local/bin", "./"};
+  char error_message[30] = "An error has occurred\n";
+    
 
   while( 1 )
   {
@@ -134,12 +136,12 @@ int main( int argc, char * argv[] )
 
     if ((!found)&&(!builtIN))
     {
-        printf("Error: File '%s' not found in any of the specified directories.\n", filename);
+        write(STDERR_FILENO, error_message, strlen(error_message)); //printf("Error: File '%s' not found in any of the specified directories.\n", filename);
     }
     
     pid_t pid = fork();
     if (pid == -1) {
-        perror("fork");
+        write(STDERR_FILENO, error_message, strlen(error_message)); //perror("fork");
         exit(EXIT_FAILURE);
     } else if (pid == 0) {
         // Child process
@@ -151,7 +153,7 @@ int main( int argc, char * argv[] )
                     if (strcmp(token[i], ">") == 0) {
                         int fd = open(token[i + 1], O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
                         if (fd < 0) {
-                            perror("Can't open output file.");
+                            write(STDERR_FILENO, error_message, strlen(error_message)); //perror("Can't open output file.");
                             exit(0);
                         }
                         dup2(fd, 1);
@@ -164,7 +166,7 @@ int main( int argc, char * argv[] )
         if ((!builtIN)&&(found)){
           if (execv(path, token) == -1)
           {
-             perror("execv");
+             write(STDERR_FILENO, error_message, strlen(error_message)); //perror("execv");
              exit(0);
 
           }
