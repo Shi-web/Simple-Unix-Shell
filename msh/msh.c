@@ -50,10 +50,7 @@ int main(int argc, char *argv[])
         if (file == NULL)
         {
             printf("msh> ");
-            while (!fgets(command_string, MAX_COMMAND_SIZE, stdin))
-            {
-                break; // Exit on EOF
-            }
+            while (!fgets(command_string, MAX_COMMAND_SIZE, stdin));
         }
         else
         {
