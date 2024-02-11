@@ -103,7 +103,7 @@ void process_command(char *command_string)
 
     int found = 0;
     int builtIN = 0;
-
+    if (token[0]==NULL) return;
     if (strcmp(token[0], "exit") == 0)
     {
         if( token[1] != NULL )
@@ -173,7 +173,11 @@ void process_command(char *command_string)
                         close(fd);
 
                         token[i] = NULL;
-                        token[i + 1] = NULL;
+                        if (token[i + 1] != NULL)
+                        {
+                            write(STDERR_FILENO, error_message, strlen(error_message)); // perror("Can't open output file.");
+                            exit(0);
+                        }
                     }
                 }
                 if (execv(path, token) == -1)
