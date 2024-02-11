@@ -51,21 +51,33 @@ int main(int argc, char *argv[])
         {
             printf("msh> ");
             while (!fgets(command_string, MAX_COMMAND_SIZE, stdin));
+            process_command(command_string);
         }
         else
         {
-            if (fgets(command_string, MAX_COMMAND_SIZE, file) == NULL)
+            while (fgets(command_string, MAX_COMMAND_SIZE, file) != NULL)
             {
-                fclose(file);
-                break;
+                //printf("command line: %s",command_string);
+                process_command(command_string);
+                //fclose(file);
+                //break;
+                
             }
+            if (feof(file))
+                {
+                    exit(0);
+                }
+            
         }
+        
 
         // Process the command
-        process_command(command_string);
+       // printf("Here is the command string:%s",command_string);
+        //process_command(command_string);
     }
 
     free(command_string);
+    //printf("Here is the command string:%s",command_string);
     return 0;
 }
 
@@ -137,7 +149,7 @@ void process_command(char *command_string)
         exit(EXIT_FAILURE);
     }
     else if (pid == 0)
-    {
+    {/*
         for (int i = 0; i < MAX_NUM_ARGUMENTS; i++)
         {
             if (token[i] == NULL)
@@ -157,10 +169,33 @@ void process_command(char *command_string)
                 close(fd);
 
                 token[i] = NULL;
+                token[i+1] = NULL;
             }
-        }
+        }*/
         if ((!builtIN) && (found))
         {
+            for (int i = 0; i < MAX_NUM_ARGUMENTS; i++)
+        {
+            if (token[i] == NULL)
+            {
+                break;
+            }
+
+            if (strcmp(token[i], ">") == 0)
+            {
+                int fd = open(token[i + 1], O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+                if (fd < 0)
+                {
+                    write(STDERR_FILENO, error_message, strlen(error_message)); //perror("Can't open output file.");
+                    exit(0);
+                }
+                dup2(fd, 1);
+                close(fd);
+
+                token[i] = NULL;
+                token[i+1] = NULL;
+            }
+        }
             if (execv(path, token) == -1)
             {
                 write(STDERR_FILENO, error_message, strlen(error_message)); //perror("execv");
