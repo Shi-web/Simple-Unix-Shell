@@ -49,29 +49,33 @@ int main(int argc, char *argv[])
     {
         if (file == NULL)
         {
-            printf("msh> ");
-            while (!fgets(command_string, MAX_COMMAND_SIZE, stdin))
-                ;
-            process_command(command_string);
+            write(STDERR_FILENO, error_message, strlen(error_message));
+            exit(EXIT_FAILURE);
         }
-        else
+        else if (file != NULL)
         {
             while (fgets(command_string, MAX_COMMAND_SIZE, file) != NULL)
             {
-                //printf("command line: %s", command_string);
-                process_command(command_string);
-                // fclose(file);
-                // break;
+            
+                    process_command(command_string);
+                
             }
             if (feof(file))
             {
                 exit(0);
             }
+            
+        }
+        else
+        {
+            printf("msh> ");
+            while (!fgets(command_string, MAX_COMMAND_SIZE, stdin));
+                
+            process_command(command_string);
+            
         }
 
-        // Process the command
-        // printf("Here is the command string:%s",command_string);
-        // process_command(command_string);
+        
     }
 
     free(command_string);
@@ -90,16 +94,17 @@ void process_command(char *command_string)
     char *working_string = strdup(command_string);
     char *head_ptr = working_string;
 
-    while (((argument_pointer = strsep(&working_string, WHITESPACE)) != NULL) &&
-           (token_count < MAX_NUM_ARGUMENTS))
-    {
-        token[token_count] = strndup(argument_pointer, MAX_COMMAND_SIZE);
-        if (strlen(token[token_count]) == 0)
-        {
-            token[token_count] = NULL;
+    // Tokenize the input with whitespace used as the delimiter
+        while (((argument_pointer = strsep(&working_string, WHITESPACE)) != NULL) &&
+               (token_count < MAX_NUM_ARGUMENTS)) {
+            if (strlen(argument_pointer) > 0) {
+                token[token_count] = strdup(argument_pointer);
+                token_count++;
+            }
         }
-        token_count++;
-    }
+
+        // Ensure the last element of the token is NULL
+        token[token_count] = NULL;
 
     int found = 0;
     int builtIN = 0;
@@ -135,7 +140,7 @@ void process_command(char *command_string)
             if (check_executable_file(full_path))
             {
                 found = 1;
-                strcpy(path, full_path);
+                strcpy(path, full_path);             
                 break;
             }
         }
@@ -163,6 +168,12 @@ void process_command(char *command_string)
 
                     if (strcmp(token[i], ">") == 0)
                     {
+                        // Check if a file is provided after the redirection symbol
+                         if (token[i + 1] == NULL || token[i + 2] != NULL) {
+                            write(STDERR_FILENO, error_message, strlen(error_message));
+                            exit(0);
+                        }
+
                         int fd = open(token[i + 1], O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
                         if (fd < 0)
                         {
@@ -173,11 +184,9 @@ void process_command(char *command_string)
                         close(fd);
 
                         token[i] = NULL;
-                        if (token[i + 1] != NULL)
-                        {
-                            write(STDERR_FILENO, error_message, strlen(error_message)); // perror("Can't open output file.");
-                            exit(0);
-                        }
+                      
+                      
+
                     }
                 }
                 if (execv(path, token) == -1)
