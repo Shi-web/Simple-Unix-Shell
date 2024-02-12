@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
         file = fopen(argv[1], "r");
         if (file == NULL)
         {
-            write(STDERR_FILENO, error_message, strlen(error_message)); // perror("Error opening file");
+            write(STDERR_FILENO, error_message, strlen(error_message)); 
             exit(EXIT_FAILURE);
         }
     }
@@ -79,7 +79,6 @@ int main(int argc, char *argv[])
     }
 
     free(command_string);
-    // printf("Here is the command string:%s",command_string);
     return 0;
 }
 
@@ -147,12 +146,12 @@ void process_command(char *command_string)
 
         if ((!found) && (!builtIN))
         {
-            write(STDERR_FILENO, error_message, strlen(error_message)); // printf("Error: File '%s' not found in any of the specified directories.\n", filename);
+            write(STDERR_FILENO, error_message, strlen(error_message));
         }
         pid_t pid = fork();
         if (pid == -1)
         {
-            write(STDERR_FILENO, error_message, strlen(error_message)); // perror("fork");
+            write(STDERR_FILENO, error_message, strlen(error_message)); 
             exit(EXIT_FAILURE);
         }
         else if (pid == 0)
@@ -177,7 +176,7 @@ void process_command(char *command_string)
                         int fd = open(token[i + 1], O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
                         if (fd < 0)
                         {
-                            write(STDERR_FILENO, error_message, strlen(error_message)); // perror("Can't open output file.");
+                            write(STDERR_FILENO, error_message, strlen(error_message)); 
                             exit(0);
                         }
                         dup2(fd, 1);
@@ -191,7 +190,7 @@ void process_command(char *command_string)
                 }
                 if (execv(path, token) == -1)
                 {
-                    write(STDERR_FILENO, error_message, strlen(error_message)); // perror("execv");
+                    write(STDERR_FILENO, error_message, strlen(error_message)); 
                     exit(0);
                 }
             }
