@@ -43,30 +43,36 @@ int main(int argc, char *argv[])
             write(STDERR_FILENO, error_message, strlen(error_message)); 
             exit(EXIT_FAILURE);
         }
+       
+    }
+     if (argc>2)
+    {
+            write(STDERR_FILENO, error_message, strlen(error_message)); 
+            exit(EXIT_FAILURE);
+
     }
 
     while (1)
     {
-        if (file == NULL)
+        if (argc==2)
         {
-            write(STDERR_FILENO, error_message, strlen(error_message));
-            exit(EXIT_FAILURE);
-        }
-        else if (file != NULL)
-        {
-            while (fgets(command_string, MAX_COMMAND_SIZE, file) != NULL)
+        
+            if (file != NULL)
             {
+                while (fgets(command_string, MAX_COMMAND_SIZE, file) != NULL)
+                {   
             
-                    process_command(command_string);
-                
-            }
-            if (feof(file))
-            {
-                exit(0);
-            }
+                        process_command(command_string);
+
+                }
+                if (feof(file))
+                {
+                    exit(0);
+                }
             
+            }
         }
-        else
+        if(argc==1)
         {
             printf("msh> ");
             while (!fgets(command_string, MAX_COMMAND_SIZE, stdin));
